@@ -1,7 +1,11 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  output: 'standalone',
+  allowedDevOrigins: [
+    "*.pit-1.try.coder.app",
+    "*.try.coder.app",
+  ],
 };
 
 export default nextConfig;
