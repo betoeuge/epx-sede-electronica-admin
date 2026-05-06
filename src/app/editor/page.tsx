@@ -12,7 +12,7 @@ import { SECTION_REGISTRY } from "@/components/builder/sectionRegistry";
 import { ActivityPanel } from "@/components/builder/ActivityPanel";
 import { Activity } from "lucide-react";
 import { Spinner } from "@/components/ui/Spinner";
-import { useSites } from "@/hooks/useSites";
+import { useSites, useActivateSite } from "@/hooks/useSites";
 import { usePages, useCreatePage, useDeletePage } from "@/hooks/usePages";
 import type { SiteResponse } from "@/types/sites.types";
 import type { SitePageResponse } from "@/lib/pages.service";
@@ -168,7 +168,7 @@ function PagesPanel({ siteId }: { siteId: string }) {
     }));
     const sectionsJson = sections.length > 0 ? JSON.stringify(sections) : null;
     createPage(
-      { name: newPageName.trim(), slug: newPageSlug.trim(), parentId: newPageParentId || undefined, sortOrder: pages.length, isHome: false, sectionsJson },
+      { name: newPageName.trim(), slug: newPageSlug.trim(), parentId: newPageParentId || undefined, sortOrder: pages.length, isHome: false, sectionsJson, layout: newPageTemplate !== 'blank' ? newPageTemplate : null },
       { onSuccess: (p) => { setActiveId(p.id); closeNewPageModal(); } }
     );
   }
@@ -558,7 +558,7 @@ function parseBlocks(bodyJson?: string): ContentItemWithBlocks["blocks"] {
 }
 
 // ── CMS panel ─────────────────────────────────────────────────────────────────
-function CMSPanel({ siteId }: { siteId: string }) {
+function CMSPanel({ siteId, siteSlug }: { siteId: string; siteSlug: string }) {
   const cmsFont = "'Inter', sans-serif";
 
   // ── Collections state ──
@@ -1027,6 +1027,7 @@ function CMSPanel({ siteId }: { siteId: string }) {
           item={editingItem}
           collectionLabel={collectionLabel}
           siteId={siteId}
+          siteSlug={siteSlug}
           collectionId={activeCollectionId ?? ""}
           cmsCollections={collections.map((c) => ({ id: c.id, name: c.name }))}
           onClose={() => setEditingItem(null)}
@@ -1054,6 +1055,29 @@ function QuickModal({ title, children, onClose }: { title: string; children: Rea
         {children}
       </div>
     </div>
+  );
+}
+
+// ── Publish button ────────────────────────────────────────────────────────────
+function PublishButton({ siteId, site }: { siteId: string; site: SiteResponse | null }) {
+  const { mutate: activate, isPending } = useActivateSite();
+  const isLive = site?.status === "Active";
+
+  return (
+    <button
+      onClick={() => { if (!isLive) activate(siteId); }}
+      disabled={isPending || isLive}
+      className="flex gap-2 items-center px-4 py-1.5 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity disabled:opacity-60"
+      style={{ background: isLive ? "#27ae60" : "#2d9cdb" }}
+      title={isLive ? "Sitio publicado" : "Publicar sitio"}
+    >
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+        {isLive
+          ? <polyline points="20 6 9 17 4 12" />
+          : <polygon points="5 3 19 12 5 21 5 3" />}
+      </svg>
+      {isPending ? "Publicando…" : isLive ? "Publicado" : "Publicar"}
+    </button>
   );
 }
 
@@ -1145,14 +1169,18 @@ function EditorContent() {
               </button>
             ))}
           </div>
-          <button className="flex gap-2 items-center px-4 py-1.5 rounded-lg text-sm font-medium text-[#e0e0e0] hover:bg-white/10 transition-colors border" style={{ background: "rgba(255,255,255,0.05)", borderColor: "#2d2d2d" }}>
+          <button
+            onClick={() => siteId && window.open(`/preview/${siteId}`, "_blank")}
+            disabled={!siteId}
+            className="flex gap-2 items-center px-4 py-1.5 rounded-lg text-sm font-medium text-[#e0e0e0] hover:bg-white/10 transition-colors border disabled:opacity-40"
+            style={{ background: "rgba(255,255,255,0.05)", borderColor: "#2d2d2d" }}
+            title="Vista previa del sitio"
+          >
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polygon points="5 3 19 12 5 21 5 3" /></svg>
             Vista previa
           </button>
-          <button className="flex gap-2 items-center px-4 py-1.5 rounded-lg text-sm font-medium text-white hover:opacity-90 transition-opacity" style={{ background: "#2d9cdb" }}>
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="20 6 9 17 4 12" /></svg>
-            Publicar
-          </button>
+          <PublishButton siteId={siteId} site={site} />
+
         </div>
       </div>
 
@@ -1183,7 +1211,7 @@ function EditorContent() {
           <>
             {/* Lightweight panels — mount on demand */}
             {activePanel === "pages" && <PagesPanel siteId={siteId} />}
-            {activePanel === "cms" && <CMSPanel siteId={siteId} />}
+            {activePanel === "cms" && <CMSPanel siteId={siteId} siteSlug={site?.slug ?? ""} />}
             {activePanel === "settings" && (site ? <SettingsPanel site={site} onSaved={() => {}} /> : <div className="flex flex-1 items-center justify-center"><Spinner size="lg" /></div>)}
             {activePanel === "activity" && <ActivityPanel siteId={siteId} />}
 

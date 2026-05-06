@@ -31,6 +31,7 @@ export interface CreateSiteRequest {
   description?: string;
   accentColor?: string;
   groupId?: string;
+  templateId?: string;
 }
 
 export interface UpdateSiteRequest {

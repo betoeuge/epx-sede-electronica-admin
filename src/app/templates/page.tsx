@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useCreateSite } from "@/hooks/useSites";
+import { useCreateSite, useSiteTemplates } from "@/hooks/useSites";
 import { updateSiteSettings } from "@/lib/sites.service";
 import { pagesService } from "@/lib/pages.service";
 import { Modal } from "@/components/ui/Modal";
@@ -41,44 +41,12 @@ const DEFAULT_PAGES = [
   { id: "contacto",      label: "Contacto",     slug: "/contacto" },
 ];
 
-const TEMPLATES: Template[] = [
-  {
-    id: "gov-co",
-    name: "Sede Electrónica GOV.CO",
-    category: "Gobierno",
-    color: "#003DA6",
-    description: "Portal institucional completo: header GOV.CO, hero, accesos rápidos, noticias, transparencia y footer. Listo para personalizar.",
-    isReal: true,
-  },
-];
+// Color palette for non-live template cards (cycles by sortOrder)
+const TEMPLATE_COLORS = ["#003DA6", "#1A5276", "#154360", "#1B2631", "#6C3483", "#117A65"];
 
-const TEMPLATE_DEFAULT_PAGES: Record<string, Array<{
-  name: string; slug: string; isHome: boolean; sortOrder: number; templateId: string;
-}>> = {
-  "gov-co": [
-    { name: "Inicio",    slug: "inicio",    isHome: true,  sortOrder: 1, templateId: "landing" },
-    { name: "Trámites",  slug: "tramites",  isHome: false, sortOrder: 2, templateId: "tramite" },
-    { name: "Informes",  slug: "informes",  isHome: false, sortOrder: 3, templateId: "informe" },
-    { name: "Noticias",  slug: "noticias",  isHome: false, sortOrder: 4, templateId: "noticia" },
-  ],
-};
+// IDs that have a real visual preview (GOV.CO style)
+const REAL_PREVIEW_IDS = new Set(["gov-standard", "gov-co", "municipio", "ministerio"]);
 
-// Settings applied to the site when a template is selected
-const TEMPLATE_SETTINGS: Record<string, object> = {
-  "gov-co": {
-    primary:     "#003DA6",
-    primaryDark: "#002D7C",
-    accent:      "#F5A623",
-    themeName:   "Ambiente",
-    navBg:       "#f4f4f4",
-    navBorder:   "#ffa741",
-    heroLeft:    "#005384",
-    headerStyle: "sedes-electronicas",
-    footerStyle: "version01",
-    fontTitles:  "Nunito Sans",
-    fontBody:    "Verdana",
-  },
-};
 
 function GovPreviewThumbnail() {
   return (
@@ -198,13 +166,9 @@ function EmpezarModal({ template, onClose }: { template: Template; onClose: () =
 
   function handleCreate() {
     createSite(
-      { name, slug, description: template.description, accentColor: template.color },
+      { name, slug, description: template.description, accentColor: template.color, templateId: template.id },
       {
-        onSuccess: async (site) => {
-          try {
-            const settings = TEMPLATE_SETTINGS[template.id] ?? {};
-            await updateSiteSettings(site.id, JSON.stringify(settings));
-          } catch { /* non-fatal */ }
+        onSuccess: (site) => {
           router.push(`/editor?site=${site.id}`);
         },
       }
@@ -305,7 +269,19 @@ function TemplatesPageInner() {
   const searchParams = useSearchParams();
   const pendingSiteId = searchParams.get("site");
 
-  const filtered = TEMPLATES.filter(
+  const { data: apiTemplates, isLoading: templatesLoading } = useSiteTemplates();
+
+  // Map API templates to UI Template shape
+  const templates: Template[] = (apiTemplates ?? []).map((t, i) => ({
+    id: t.id,
+    name: t.name,
+    category: "Gobierno",
+    color: TEMPLATE_COLORS[i % TEMPLATE_COLORS.length],
+    description: t.description ?? "",
+    isReal: REAL_PREVIEW_IDS.has(t.id),
+  }));
+
+  const filtered = templates.filter(
     (t) =>
       !searchQuery ||
       t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -314,42 +290,34 @@ function TemplatesPageInner() {
 
   async function handleEmpezar(template: Template) {
     if (pendingSiteId) {
+      // Applying template to an existing (newly created) site
       setApplying(true);
       try {
-        const DEFAULT_SECTIONS = [
-          { id: "header", name: "Header", locked: true },
-          { id: "footer", name: "Footer", locked: true },
-        ];
-        const defaultPages = TEMPLATE_DEFAULT_PAGES[template.id] ?? [];
-        const createdPages: { id: string; label: string; templateId: string }[] = [];
+        const apiTpl = (apiTemplates ?? []).find((t) => t.id === template.id);
 
-        for (const p of defaultPages) {
+        // Create pages from the template's defaultPagesJson blueprint
+        type PageBlueprint = { name: string; slug: string; layout?: string; isHome: boolean };
+        const blueprints: PageBlueprint[] = apiTpl
+          ? JSON.parse(apiTpl.defaultPagesJson)
+          : [];
+
+        const createdPages: { id: string; label: string }[] = [];
+        for (let i = 0; i < blueprints.length; i++) {
+          const bp = blueprints[i];
           const created = await pagesService.create(pendingSiteId, {
-            name: p.name,
-            slug: p.slug,
-            isHome: p.isHome,
-            sortOrder: p.sortOrder,
-            sectionsJson: JSON.stringify({
-              templateId: p.templateId,
-              sections: DEFAULT_SECTIONS,
-            }),
+            name: bp.name,
+            slug: bp.slug,
+            isHome: bp.isHome,
+            sortOrder: i + 1,
+            layout: bp.layout,
           });
-          createdPages.push({ id: created.id, label: p.name, templateId: p.templateId });
+          createdPages.push({ id: created.id, label: bp.name });
         }
 
-        const navigation = createdPages.map((p, i) => ({
-          id: `nav-${i + 1}`,
-          label: p.label,
-          type: "simple" as const,
-          target: p.id,
-        }));
-
-        const settings = {
-          ...(TEMPLATE_SETTINGS[template.id] ?? {}),
-          navigation,
-          activePageId: createdPages[0]?.id ?? null,
-        };
-        await updateSiteSettings(pendingSiteId, JSON.stringify(settings));
+        // Apply settings from the template's defaultSettingsJson
+        if (apiTpl?.defaultSettingsJson) {
+          await updateSiteSettings(pendingSiteId, apiTpl.defaultSettingsJson);
+        }
       } catch (e) {
         console.error("Error applying template:", e);
       }
@@ -428,8 +396,12 @@ function TemplatesPageInner() {
 
         <div className="relative flex flex-col gap-6 items-center max-w-[1240px] w-full">
           <h2 className="font-medium text-xl text-white w-full">Todos los templates</h2>
-          {filtered.length === 0 ? (
-            <p className="text-[#828282] text-sm py-10">No se encontraron templates para &quot;{searchQuery}&quot;</p>
+          {templatesLoading ? (
+            <div className="flex items-center justify-center py-16 w-full"><Spinner /></div>
+          ) : filtered.length === 0 ? (
+            <p className="text-[#828282] text-sm py-10">
+              {searchQuery ? `No se encontraron templates para "${searchQuery}"` : "No hay templates disponibles."}
+            </p>
           ) : (
             <div className="flex flex-wrap gap-6 w-full">
               {filtered.map((tpl) => (

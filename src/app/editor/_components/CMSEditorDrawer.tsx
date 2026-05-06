@@ -31,6 +31,7 @@ export interface CMSEditorDrawerProps {
   item: ContentItemWithBlocks;
   collectionLabel: string;
   siteId: string;
+  siteSlug: string;
   collectionId: string;
   cmsCollections: Array<{ id: string; name: string }>;
   onClose: () => void;
@@ -901,7 +902,9 @@ function BlockEditor({
 
 export function CMSEditorDrawer({
   item,
+  siteId,
   collectionLabel,
+  siteSlug,
   cmsCollections,
   onClose,
   onSave,
@@ -1023,7 +1026,10 @@ export function CMSEditorDrawer({
 
         {/* Actions */}
         <div style={{ display: "flex", gap: "0.5rem", alignItems: "center" }}>
-          <GhostButton style={{ padding: "0.5rem 1rem" }}>
+          <GhostButton
+            style={{ padding: "0.5rem 1rem" }}
+            onClick={() => siteSlug && window.open(`/preview/${siteId}`, "_blank")}
+          >
             {EyeIcon}
             Visualizar
           </GhostButton>

@@ -34,6 +34,21 @@ export async function updateSiteSettings(siteId: string, settingsJson: string): 
   await http.put(`/api/v1/sites/${siteId}/settings`, { settingsJson });
 }
 
+export interface SiteTemplateItem {
+  id: string;
+  name: string;
+  description?: string;
+  previewImageUrl?: string;
+  sortOrder: number;
+  defaultSettingsJson: string;
+  defaultPagesJson: string;
+}
+
+export const siteTemplatesService = {
+  getAll: () =>
+    http.get<SiteTemplateItem[]>('/api/v1/site-templates').then((r) => r.data),
+};
+
 export const siteGroupsService = {
   create: (data: CreateSiteGroupRequest) =>
     http.post<SiteGroupResponse>('/api/v1/site-groups', data).then((r) => r.data),

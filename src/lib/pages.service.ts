@@ -11,6 +11,7 @@ export interface SitePageResponse {
   createdAt: string;
   updatedAt?: string;
   sectionsJson?: string;
+  layout?: string;
 }
 
 export interface CreatePageRequest {
@@ -20,6 +21,7 @@ export interface CreatePageRequest {
   sortOrder?: number;
   isHome?: boolean;
   sectionsJson?: string | null;
+  layout?: string | null;
 }
 
 export interface UpdatePageRequest {
@@ -29,6 +31,7 @@ export interface UpdatePageRequest {
   sortOrder: number;
   isVisible: boolean;
   sectionsJson?: string;
+  layout?: string;
 }
 
 export const pagesService = {
