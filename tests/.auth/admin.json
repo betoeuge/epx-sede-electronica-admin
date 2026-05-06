@@ -1,0 +1,39 @@
+{
+  "cookies": [
+    {
+      "name": "sede_installed",
+      "value": "true",
+      "domain": "localhost",
+      "path": "/",
+      "expires": 1809373122.280016,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Strict"
+    },
+    {
+      "name": "sede_token",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmYzgzMGQ1Ny1jYjMwLTRhZmUtYWZmMC0wZmIyOTk1YWMwMTciLCJlbWFpbCI6ImFkbWluQGFkbWluLmNvbSIsInVuaXF1ZV9uYW1lIjoiYWRtaW4iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9naXZlbm5hbWUiOiJBbGJlcnRvIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvc3VybmFtZSI6Ik1hcnRpbmV6IiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiU3VwZXJBZG1pbiIsImp0aSI6ImZiNzRmNjdmLTA2MmEtNGYyNi05YzU4LWVlNDU5YTc4YWM0NiIsImV4cCI6MTc3Nzg0MDcyMiwiaXNzIjoiU2VkZUVsZWN0cm9uaWNhIiwiYXVkIjoiU2VkZUVsZWN0cm9uaWNhQ2xpZW50cyJ9.Kz1jpPjUnr7alYiAMgracP8vBWLGBY820SYXDbEtIl0",
+      "domain": "localhost",
+      "path": "/",
+      "expires": 1777865922.971379,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "http://localhost:3000",
+      "localStorage": [
+        {
+          "name": "sede_user",
+          "value": "{\"id\":\"fc830d57-cb30-4afe-aff0-0fb2995ac017\",\"userName\":\"admin\",\"email\":\"admin@admin.com\",\"firstName\":\"Alberto\",\"lastName\":\"Martinez\",\"role\":\"SuperAdmin\",\"ecmToken\":null}"
+        },
+        {
+          "name": "sede_token",
+          "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJmYzgzMGQ1Ny1jYjMwLTRhZmUtYWZmMC0wZmIyOTk1YWMwMTciLCJlbWFpbCI6ImFkbWluQGFkbWluLmNvbSIsInVuaXF1ZV9uYW1lIjoiYWRtaW4iLCJodHRwOi8vc2NoZW1hcy54bWxzb2FwLm9yZy93cy8yMDA1LzA1L2lkZW50aXR5L2NsYWltcy9naXZlbm5hbWUiOiJBbGJlcnRvIiwiaHR0cDovL3NjaGVtYXMueG1sc29hcC5vcmcvd3MvMjAwNS8wNS9pZGVudGl0eS9jbGFpbXMvc3VybmFtZSI6Ik1hcnRpbmV6IiwiaHR0cDovL3NjaGVtYXMubWljcm9zb2Z0LmNvbS93cy8yMDA4LzA2L2lkZW50aXR5L2NsYWltcy9yb2xlIjoiU3VwZXJBZG1pbiIsImp0aSI6ImZiNzRmNjdmLTA2MmEtNGYyNi05YzU4LWVlNDU5YTc4YWM0NiIsImV4cCI6MTc3Nzg0MDcyMiwiaXNzIjoiU2VkZUVsZWN0cm9uaWNhIiwiYXVkIjoiU2VkZUVsZWN0cm9uaWNhQ2xpZW50cyJ9.Kz1jpPjUnr7alYiAMgracP8vBWLGBY820SYXDbEtIl0"
+        }
+      ]
+    }
+  ]
+}

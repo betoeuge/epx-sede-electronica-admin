@@ -1,0 +1,3 @@
+<svg width="100%" height="100%" overflow="visible" style="display: block;" viewBox="0 0 16.5 16.5" fill="none" xmlns="http://www.w3.org/2000/svg">
+<path id="Icon" d="M0.75 8.25H15.75M0.75 8.25C0.75 12.3921 4.10786 15.75 8.25 15.75M0.75 8.25C0.75 4.10786 4.10786 0.75 8.25 0.75M15.75 8.25C15.75 12.3921 12.3921 15.75 8.25 15.75M15.75 8.25C15.75 4.10786 12.3921 0.75 8.25 0.75M8.25 0.75C10.126 2.80376 11.1921 5.46903 11.25 8.25C11.1921 11.031 10.126 13.6962 8.25 15.75M8.25 0.75C6.37404 2.80376 5.30794 5.46903 5.25 8.25C5.30794 11.031 6.37404 13.6962 8.25 15.75" stroke="var(--stroke-color, currentColor)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
